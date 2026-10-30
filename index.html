@@ -137,7 +137,7 @@ kbd{font-family:var(--f-mono);font-size:12.5px;background:var(--night-3);border-
 .layer header .mono{color:var(--ink-3);font-size:12px}
 .boxes{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .box{background:rgba(11,34,51,.85);border-radius:8px;padding:10px 12px;font-size:13.5px;color:var(--ink-2)}
-.box b{display:block;font-family:var(--f-mono);font-size:12.5px;color:var(--ink);font-weight:600;margin-bottom:2px}
+.box b{overflow-wrap:anywhere;display:block;font-family:var(--f-mono);font-size:12.5px;color:var(--ink);font-weight:600;margin-bottom:2px}
 .pipe{grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-family:var(--f-mono);font-size:12.5px;background:var(--night-2);border-radius:12px;padding:14px 16px}
 .pipe span{background:var(--night);padding:4px 9px;border-radius:6px}
 .pipe i{color:var(--cheese);font-style:normal}
@@ -270,6 +270,27 @@ body.present .present-toggle{background:var(--night-2);color:var(--ink-2);border
 .rl span:not(.d){font-size:13.5px;color:var(--ink-2)}
 .rl.on b{color:var(--cheese)}
 .reltl a{margin-top:12px}
+
+/* responsive */
+code{overflow-wrap:anywhere}
+.commit{grid-template-columns:auto minmax(0,1fr)!important}
+.two>*,.arch>*,.people>*,.playgrid>*,.sndgrid>*,.cards>*,.relgrid>*,.hero>*,.boxes>*{min-width:0}
+
+.svgwrap.fit svg{min-width:0}
+@media (max-width:640px){
+  section{padding-block:56px}
+  .hero{padding-block:40px 32px}
+  .locrow{grid-template-columns:1fr;gap:4px}
+  .svgwrap:not(.fit)::before{content:"гортайте вбік →";display:block;position:sticky;left:0;font-family:var(--f-mono);font-size:11px;color:var(--ink-3);margin-bottom:4px}
+  .chart{padding:16px 14px 12px}
+  .eyebrow b{font-size:36px}
+  .lane-l{min-width:0;width:100%}
+  .hits .pipe{font-size:11.5px}
+  .walk-toggle,.present-toggle{font-size:11px;padding:6px 10px}
+  .present-toggle{bottom:calc(52px + env(safe-area-inset-bottom,0px))}
+  .tick li{grid-template-columns:32px 1fr}
+  .rigwrap{grid-template-columns:1fr 1fr}
+}
 
 /* walking heroine */
 .walker{position:fixed;left:0;bottom:env(safe-area-inset-bottom,0px);height:150px;width:77px;z-index:4;pointer-events:none;will-change:transform}
@@ -1071,7 +1092,7 @@ body.no-walker .walker{display:none}
     </div>
     <div class="chart" id="animBox" style="margin:0">
       <header><span class="mono muted" style="font-size:12px">скільки частин рухає кожен кліп</span></header>
-      <div class="svgwrap"><svg id="animm" viewBox="0 0 470 300" role="img" aria-label="Матриця: які групи частин тіла анімує кожен кліп героїні"></svg></div>
+      <div class="svgwrap fit"><svg id="animm" viewBox="0 0 470 300" role="img" aria-label="Матриця: які групи частин тіла анімує кожен кліп героїні"></svg></div>
       <div class="tip" id="animTip" hidden></div>
       <p class="muted" style="font-size:13px;margin-top:6px">Чим яскравіша клітинка, тим більша частка групи рухається в кліпі. Під назвою кліпу його тривалість. Idle, Fall і Wall Slide довгі й повільні, Run, Action, Hurt і Death короткі.</p>
     </div>
@@ -1107,7 +1128,7 @@ body.no-walker .walker{display:none}
     <p class="muted" style="font-size:13.5px">Пораховано через <code>git blame</code> на фінальному коміті: показує, хто <em>останнім</em> змінював кожен рядок. Якщо у v2 Ігор переписав файл Крістіни, ці рядки зараховано йому.</p>
     <div class="locsum" id="locSum"></div>
     <h4 class="maph" style="margin-top:18px">Assets/Extensions/, по файлах</h4>
-    <div class="svgwrap"><svg id="loc" viewBox="0 0 900 560" role="img" aria-label="Рядки коду в кожному файлі Extensions за автором"></svg></div>
+    <div class="svgwrap fit"><svg id="loc" viewBox="0 0 900 560" role="img" aria-label="Рядки коду в кожному файлі Extensions за автором"></svg></div>
     <div class="tip" id="locTip" hidden></div>
   </div>
 
@@ -1329,6 +1350,7 @@ addEventListener('keydown',e=>{
   // horizontal bars (windows + ranges)
   function hbars(id,boxId,tipId,rows,max,ticks,unit,color,W,H){
     const s=document.getElementById(id),box=document.getElementById(boxId),t=tipper(box,document.getElementById(tipId));
+    if(box.clientWidth<600){W=340;H=Math.round(H*.95);s.setAttribute('viewBox',`0 0 ${W} ${H}`)}
     const L=150,R=46,top=10,axisY=H-22,rh=(axisY-top)/rows.length,bh=Math.min(18,rh-12),sx=x=>L+x/max*(W-L-R);
     ticks.forEach(x=>{s.append(el('line',{x1:sx(x),x2:sx(x),y1:top,y2:axisY,stroke:C.grid,'stroke-width':1,'stroke-dasharray':x?'2 4':''}));txt(s,sx(x),axisY+16,x,{'text-anchor':'middle','font-family':MONO,fill:C.ink3,'font-size':10.5})});
     rows.forEach(([name,val,desc],i)=>{const y=top+i*rh+(rh-bh)/2,x1=sx(val),r=4;
@@ -1445,14 +1467,22 @@ addEventListener('keydown',e=>{
     const grp=n=>/Bone|Skirt/.test(n)?'skirt':/Face|Eye|Hair_Rig/.test(n)?'head':/Arm|Hand/.test(n)?'arms':/Leg|Boot/.test(n)?'legs':'body';
     const rows=[['head','Голова'],['body','Тулуб'],['arms','Руки'],['legs','Ноги'],['skirt','Спідниця']];
     const cols=[['Idle','Idle'],['Run','Run'],['Fall','Fall'],['Wall_Slide','Wall Slide'],['Action','Action'],['Hurt','Hurt'],['Death','Death']];
-    const L=78,T=44,cw=(470-L-4)/cols.length,ch=46;
-    cols.forEach(([k,n],ci)=>{const c=D.rig.clips[k];txt(s,L+ci*cw+cw/2,16,n,{'text-anchor':'middle',fill:C.ink,'font-size':11.5});txt(s,L+ci*cw+cw/2,31,c.len+' с',{'text-anchor':'middle','font-family':MONO,'font-size':10,fill:C.ink3})});
-    rows.forEach(([g,n],ri)=>{const all=J.filter(j=>grp(j)===g);txt(s,L-8,T+ri*ch+ch/2+4,n,{'text-anchor':'end',fill:C.ink2,'font-size':12});
-      cols.forEach(([k,cn],ci)=>{const parts=D.rig.clips[k].parts.filter(p=>all.includes(p)),f=parts.length/all.length,x=L+ci*cw,y=T+ri*ch;
-        const r=el('rect',{x:x+1,y:y+1,width:cw-2,height:ch-2,rx:4,fill:`rgba(246,195,58,${(.06+f*.84).toFixed(2)})`});s.append(r);
-        txt(s,x+cw/2,y+ch/2+4,`${parts.length}/${all.length}`,{'text-anchor':'middle','font-family':MONO,'font-size':11,fill:f>.55?'#0b2233':C.ink});
-        const ev=D.rig.clips[k].ev.length?`<div>подія: ${D.rig.clips[k].ev.join(', ')}</div>`:'';
-        hover(r,s,box,tp,`<b>${cn} · ${n}: ${parts.length} з ${all.length}</b><div>${parts.length?parts.join(', '):'нічого не рухається'}</div>${ev}`,x+cw/2,y)})});
+    const NW=box.clientWidth<600;
+    const cell=(x,y,w,h,k,cn,g,n)=>{const all=J.filter(j=>grp(j)===g),parts=D.rig.clips[k].parts.filter(p=>all.includes(p)),f=parts.length/all.length;
+      const r=el('rect',{x:x+1,y:y+1,width:w-2,height:h-2,rx:4,fill:`rgba(246,195,58,${(.06+f*.84).toFixed(2)})`});s.append(r);
+      txt(s,x+w/2,y+h/2+4,`${parts.length}/${all.length}`,{'text-anchor':'middle','font-family':MONO,'font-size':11,fill:f>.55?'#0b2233':C.ink});
+      const ev=D.rig.clips[k].ev.length?`<div>подія: ${D.rig.clips[k].ev.join(', ')}</div>`:'';
+      hover(r,s,box,tp,`<b>${cn} · ${n}: ${parts.length} з ${all.length}</b><div>${parts.length?parts.join(', '):'нічого не рухається'}</div>${ev}`,x+w/2,y)};
+    if(!NW){
+      const L=78,T=44,cw=(470-L-4)/cols.length,ch=46;
+      cols.forEach(([k,n],ci)=>{const c=D.rig.clips[k];txt(s,L+ci*cw+cw/2,16,n,{'text-anchor':'middle',fill:C.ink,'font-size':11.5});txt(s,L+ci*cw+cw/2,31,c.len+' с',{'text-anchor':'middle','font-family':MONO,'font-size':10,fill:C.ink3})});
+      rows.forEach(([g,n],ri)=>{txt(s,L-8,T+ri*ch+ch/2+4,n,{'text-anchor':'end',fill:C.ink2,'font-size':12});cols.forEach(([k,cn],ci)=>cell(L+ci*cw,T+ri*ch,cw,ch,k,cn,g,n))});
+    } else {
+      const W=340,L=92,T=26,cw=(W-L-2)/rows.length,ch=36;s.setAttribute('viewBox',`0 0 ${W} ${T+cols.length*ch+4}`);
+      rows.forEach(([g,n],ri)=>txt(s,L+ri*cw+cw/2,16,n,{'text-anchor':'middle',fill:C.ink,'font-size':10.5}));
+      cols.forEach(([k,cn],ci)=>{const y=T+ci*ch;txt(s,L-8,y+ch/2,cn,{'text-anchor':'end',fill:C.ink2,'font-size':11.5});txt(s,L-8,y+ch/2+12,D.rig.clips[k].len+' с',{'text-anchor':'end','font-family':MONO,'font-size':9.5,fill:C.ink3});
+        rows.forEach(([g,n],ri)=>cell(L+ri*cw,y,cw,ch,k,cn,g,n))});
+    }
   })();
 
   // sound map
@@ -1475,14 +1505,14 @@ addEventListener('keydown',e=>{
     const bar=(lab,[k,i],n)=>`<div class="locrow"><span class="lbl">${lab}<br><span class="muted">${n} файлів · ${k+i} рядків</span></span><div class="locbar" style="width:${(k+i)/max*100}%">${i?`<i style="background:var(--igor);width:${i/(k+i)*100}%" title="Ігор ${i}">Ігор ${i}</i>`:''}${k?`<i style="background:var(--kris);width:${k/(k+i)*100}%" title="Крістіна ${k}">Крістіна ${k}</i>`:''}</div></div>`;
     document.getElementById('locSum').innerHTML=bar('Framework',F,fw.length)+bar('Extensions',E,ex.length);
     const box=document.getElementById('locBox'),tp=tipper(box,document.getElementById('locTip')),s=document.getElementById('loc');
-    const rows=ex.slice().sort((a,b)=>(b[1]+b[2])-(a[1]+a[2])),L=230,R=60,rh=560/rows.length,bh=rh-7,m=Math.max(...rows.map(r=>r[1]+r[2])),sx=x=>x/m*(900-L-R);
-    rows.forEach(([f,k,i],ri)=>{const y=ri*rh+3,name=f.split('/').pop().replace('.cs','');
+    const NW=box.clientWidth<600,VW=NW?380:900,VH=NW?620:560;s.setAttribute('viewBox',`0 0 ${VW} ${VH}`);const rows=ex.slice().sort((a,b)=>(b[1]+b[2])-(a[1]+a[2])),L=NW?168:230,R=NW?34:60,rh=VH/rows.length,bh=rh-7,m=Math.max(...rows.map(r=>r[1]+r[2])),sx=x=>x/m*(VW-L-R);
+    rows.forEach(([f,k,i],ri)=>{const y=ri*rh+3,full=f.split('/').pop().replace('.cs',''),name=NW&&full.length>24?full.slice(0,22)+'…':full;
       txt(s,L-10,y+bh/2+4,name,{'text-anchor':'end','font-family':MONO,'font-size':11,fill:C.ink2});
       let x=L;const g=el('g',{});
       [[i,C.igor],[k,C.kris]].forEach(([n,c],si)=>{if(!n)return;const w=sx(n)-(x>L?2:0),x0=x>L?x+2:x,last=si===1||!k,r=last?3:0;
         g.append(el('path',{d:`M${x0},${y}H${x0+w-r}Q${x0+w},${y} ${x0+w},${y+r}V${y+bh-r}Q${x0+w},${y+bh} ${x0+w-r},${y+bh}H${x0}Z`,fill:c}));x=x0+w});
       txt(g,x+6,y+bh/2+4,k+i,{'font-family':MONO,'font-size':10.5,fill:C.ink});s.append(g);
-      const hit=el('rect',{x:0,y:ri*rh,width:900,height:rh,fill:'transparent'});s.append(hit);
+      const hit=el('rect',{x:0,y:ri*rh,width:VW,height:rh,fill:'transparent'});s.append(hit);
       hover(hit,s,box,tp,`<b>${f}</b><div><span style="color:${C.igor}">●</span> Ігор: ${i} рядків</div><div><span style="color:${C.kris}">●</span> Крістіна: ${k} рядків</div>`,x,y)});
   })();
 
